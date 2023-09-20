@@ -1,0 +1,137 @@
+#! /bin/sh
+
+program=fastcap
+version="2.0wr"
+vdate="071020"
+
+# The inno packager exeutable.
+inno="/inno-5.5.9/iscc"
+
+# Unix to Dos line termination converter
+u2d="files/utod.exe"
+
+topdir=data
+
+rm -rf $topdir
+mkdir $topdir
+
+bin=$topdir/bin
+share=$topdir/share
+lib=$share/fastcap
+docs=$lib/docs
+examples=$lib/examples
+
+srcbin=../bin
+srclib=..
+
+mkdir $bin
+mkdir $share
+mkdir $lib
+mkdir $docs
+mkdir $examples
+mkdir $examples/work
+mkdir $examples/work/results
+
+echo copying $srcbin
+install -sc -m 0755 $srcbin/fastcap.exe $bin
+install -sc -m 0755 $srcbin/busgen.exe $bin
+install -sc -m 0755 $srcbin/capgen.exe $bin
+install -sc -m 0755 $srcbin/cubegen.exe $bin
+install -sc -m 0755 $srcbin/pipedgen.exe $bin
+install -sc -m 0755 $srcbin/pyragen.exe $bin
+
+echo copying $srclib/examples
+cp $srclib/examples/1x1bus.lst $examples
+cp $srclib/examples/1x1coarse.neu $examples
+cp $srclib/examples/1x1fine.neu $examples
+cp $srclib/examples/1x1nonuni.neu $examples
+cp $srclib/examples/README $examples
+cp $srclib/examples/big_sphere1.neu $examples
+cp $srclib/examples/coated_sph.lst $examples
+cp $srclib/examples/cond_air_1x1.qui $examples
+cp $srclib/examples/cond_dielec_1x1.qui $examples
+cp $srclib/examples/connector2.sh $examples
+cp $srclib/examples/connector3.sh $examples
+cp $srclib/examples/connector4.sh $examples
+cp $srclib/examples/cubeeg.fig $examples
+cp $srclib/examples/dielec_face.neu $examples
+cp $srclib/examples/dielec_sides.neu $examples
+cp $srclib/examples/dielec_sides_2x2.neu $examples
+cp $srclib/examples/dielec_topbot.neu $examples
+cp $srclib/examples/pin $examples
+cp $srclib/examples/pipeeg.fig $examples
+cp $srclib/examples/ramcell.lst $examples
+cp $srclib/examples/ramcell.out $examples
+cp $srclib/examples/ramcell_bitl.neu $examples
+cp $srclib/examples/ramcell_botd.neu $examples
+cp $srclib/examples/ramcell_cond.neu $examples
+cp $srclib/examples/ramcell_gnd.neu $examples
+cp $srclib/examples/ramcell_test.neu $examples
+cp $srclib/examples/ramcell_topd.neu $examples
+cp $srclib/examples/ramgen.sh $examples
+cp $srclib/examples/sphere1.neu $examples
+cp $srclib/examples/sphere2.neu $examples
+cp $srclib/examples/sphere3.neu $examples
+cp $srclib/examples/testgen.sh $examples
+cp $srclib/examples/testrun.sh $examples
+cp $srclib/examples/via.neu $examples
+$u2d $examples/*
+rm -f $examples/*~
+
+cp $srclib/examples/work/Makefile $examples/work
+cp $srclib/examples/work/run $examples/work
+# Keep run shell script in Unix format or it won't work.
+$u2d $examples/work/Makefile
+rm -f $examples/work/*~
+
+cp $srclib/examples/work/results/1x1bus.out $examples/work/results
+cp $srclib/examples/work/results/1x1coarse.out $examples/work/results
+cp $srclib/examples/work/results/1x1fine.out $examples/work/results
+cp $srclib/examples/work/results/1x1nonuni.out $examples/work/results
+cp $srclib/examples/work/results/big_sphere1.out $examples/work/results
+cp $srclib/examples/work/results/coated_sph.out $examples/work/results
+cp $srclib/examples/work/results/dielec_face.out $examples/work/results
+cp $srclib/examples/work/results/dielec_sides.out $examples/work/results
+cp $srclib/examples/work/results/dielec_sides_2x2.out $examples/work/results
+cp $srclib/examples/work/results/dielec_topbot.out $examples/work/results
+cp $srclib/examples/work/results/ramcell.out $examples/work/results
+cp $srclib/examples/work/results/ramcell_bitl.out $examples/work/results
+cp $srclib/examples/work/results/ramcell_botd.out $examples/work/results
+cp $srclib/examples/work/results/ramcell_cond.out $examples/work/results
+cp $srclib/examples/work/results/ramcell_gnd.out $examples/work/results
+cp $srclib/examples/work/results/ramcell_test.out $examples/work/results
+cp $srclib/examples/work/results/ramcell_topd.out $examples/work/results
+cp $srclib/examples/work/results/sphere1.out $examples/work/results
+cp $srclib/examples/work/results/sphere2.out $examples/work/results
+cp $srclib/examples/work/results/sphere3.out $examples/work/results
+cp $srclib/examples/work/results/via.out $examples/work/results
+$u2d $examples/work/results/*
+rm -f $examples/work/results/*~
+
+echo copying $srclib/doc
+cp $srclib/README $docs
+cp $srclib/README.mit $docs
+cp $srclib/doc/FastCapsuppl.pdf $docs
+cp $srclib/doc/mtt.ps $docs
+cp $srclib/doc/tcad.ps $docs
+cp $srclib/doc/ug.ps $docs
+cp $srclib/doc/ug.pdf $docs
+$u2d $docs/README
+$u2d $docs/README.mit
+rm -f $docs/*~
+
+echo Completed copying files to data directory
+
+sed -e s/VERSION/$version/ -e s/VDATE/$vdate/ < files/$program.iss.in > $program.iss
+$u2d $program.iss
+
+$inno $program.iss > build.log
+if [ $? != 0 ]; then
+    echo Compile failed!
+    exit 1
+fi
+
+mv Output/*.exe .
+rmdir Output
+echo Done
+
